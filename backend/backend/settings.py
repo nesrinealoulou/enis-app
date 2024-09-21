@@ -96,16 +96,15 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'enis_tp',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': 3307,
-    }
-}
-
+     'default': {
+         'ENGINE': 'django.db.backends.mysql',
+         'NAME': 'mydb',
+         'USER': 'dbuser',
+         'PASSWORD': 'dbpassword',
+         'HOST': 'mydb.cwmk9ndzb6pr.us-east-1.rds.amazonaws.com',
+         'PORT': 3306,
+     }
+ }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -136,6 +135,9 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 USE_TZ = True
+
+CORS_ALLOW_ALL_ORIGINS = True  # To allow all origins during development
+
 
 
 # Static files (CSS, JavaScript, Images)
