@@ -42,7 +42,7 @@ pipeline {
 
         stage('Login to AWS ECR') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'cd15bc80-8a23-4622-8c73-cf38e0e139d9']]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'cd16bc80-8a23-4622-8c73-cf38e0e139d9']]) {
                     sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 746200881003.dkr.ecr.us-east-1.amazonaws.com/enis-app'
                 }
             }
