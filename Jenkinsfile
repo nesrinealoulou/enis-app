@@ -34,6 +34,17 @@ pipeline {
                                 writeFile file: 'frontend/src/config.js', text: """
                                 export const API_BASE_URL = 'http://${EC2_PUBLIC_IP}:8000';
                                 """
+                                // Debugging: Print the IP address to the Jenkins console
+                                echo "Captured EC2 Public IP: ${EC2_PUBLIC_IP}"
+                                
+                                // Update Ansible hosts file with the EC2 public IP
+                                writeFile file: 'ansible/hosts', text: """
+                                [ec2-docker]
+                                ${EC2_PUBLIC_IP}
+                                [ec2-docker:vars]
+                                ansible_ssh_private_key_file=myjupt.pem
+                                ansible_user=ubuntu
+                                """
                             }
                         }
                     }
