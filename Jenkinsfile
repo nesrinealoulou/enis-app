@@ -104,6 +104,19 @@ pipeline {
                 }
             }
         }
+        stage('Run Ansible Playbook') {
+            steps {
+                script {
+                    // Assuming Ansible and SSH configurations are already in place
+                    echo 'Running Ansible Playbook...'
+                    
+                    // Run the Ansible playbook
+                    sh '''
+                    ansible-playbook -i ansible/hosts ansible/playbook.yml
+                    '''
+                }
+            }
+        }
         
 
     }
