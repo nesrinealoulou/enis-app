@@ -45,6 +45,9 @@ pipeline {
                                 ansible_ssh_private_key_file=myjupt.pem
                                 ansible_user=ubuntu
                                 """
+                                // Echo the contents of the Ansible hosts file
+                                echo "Ansible hosts file updated. Contents:"
+                                sh 'cat ansible/hosts'
                             }
                         }
                     }
