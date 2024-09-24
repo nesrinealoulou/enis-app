@@ -180,30 +180,6 @@ output "instance_public_ip" {
   value       = aws_instance.example_instance.public_ip
 }
 
-resource "aws_security_group" "database_sg" {
-  name   = "database-sg"
-  vpc_id = aws_vpc.tp_cloud_devops_vpc.id
-  description = "Security group for rds database"
-}
-
-resource "aws_security_group_rule" "allow_mysql_inbound" {
-  type              = "ingress"
-  security_group_id = aws_security_group.database_sg.id  # Attach to your RDS security group
-  from_port         = 3306                          # MySQL default port
-  to_port           = 3306                          # MySQL default port
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]                 # Allow access from any IP (use cautiously)
-}
-
-resource "aws_security_group_rule" "allow_outbound_traffic" {
-  type              = "egress"
-  security_group_id = aws_security_group.database_sg.id  # Attach to your RDS security group
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"  # "-1" means all protocols
-  cidr_blocks       = ["0.0.0.0/0"]  # Allow outbound traffic to any destination
-}
-
 resource "aws_db_subnet_group" "database_subnet_group" {
   name        = "database-subnet-group"
   description = "Subnet group for RDS database"
@@ -230,4 +206,28 @@ resource "aws_db_instance" "db_instance" {
   db_subnet_group_name   = aws_db_subnet_group.database_subnet_group.name
   skip_final_snapshot    = false  # Enable automated backups
   final_snapshot_identifier = "mydb-final-snapshot" 
+}
+
+resource "aws_security_group" "database_sg" {
+  name   = "database-sg"
+  vpc_id = aws_vpc.tp_cloud_devops_vpc.id
+  description = "Security group for rds database"
+}
+
+resource "aws_security_group_rule" "allow_mysql_inbound" {
+  type              = "ingress"
+  security_group_id = aws_security_group.database_sg.id  # Attach to your RDS security group
+  from_port         = 3306                          # MySQL default port
+  to_port           = 3306                          # MySQL default port
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]                 # Allow access from any IP (use cautiously)
+}
+
+resource "aws_security_group_rule" "allow_outbound_traffic" {
+  type              = "egress"
+  security_group_id = aws_security_group.database_sg.id  # Attach to your RDS security group
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"  # "-1" means all protocols
+  cidr_blocks       = ["0.0.0.0/0"]  # Allow outbound traffic to any destination
 }
