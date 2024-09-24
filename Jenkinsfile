@@ -47,7 +47,7 @@ pipeline {
                                 ansible_user=ubuntu
                                 """
                                 // Set correct permissions for the private key
-                                sh 'chmod 400 ${WORKSPACE}/ansible/myjupt.pem'
+                                sh 'chmod 600 ${WORKSPACE}/ansible/myjupt.pem'
 
                                 // Debugging: Print the contents of the hosts file
                                 echo "Ansible hosts file updated. Contents:"
