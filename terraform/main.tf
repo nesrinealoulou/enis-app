@@ -175,7 +175,7 @@ resource "aws_instance" "example_instance" {
   }
 }
 
-output "instance_public_ip" {
+output "ec2_public_ip" {
   description = "Public IP address of the EC2 instance"
   value       = aws_instance.example_instance.public_ip
 }
