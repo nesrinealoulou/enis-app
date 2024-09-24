@@ -150,47 +150,6 @@ resource "aws_security_group_rule" "allow_all_outbound" {
 }
 
 
-resource "tls_private_key" "ssh_key" {
-  algorithm = "RSA"
-  rsa_bits  = 2048
-}
-
-resource "aws_key_pair" "host_key_pair" {
-  key_name   = "AppHost"
-  public_key = tls_private_key.ssh_key.public_key_openssh
-}
-resource "random_id" "bucket_suffix" {
-  byte_length = 8
-}
-resource "aws_s3_bucket" "keys_bucket" {
-  bucket = "my-ssh-keys-bucket-${random_id.bucket_suffix.hex}"  # Ensure this name is unique
-  acl    = "private"
-
-  versioning {
-    enabled = true
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-}
-resource "aws_s3_bucket_object" "private_key_object" {
-  bucket = aws_s3_bucket.keys_bucket.bucket
-  key    = "AppHost.pem"
-  content = tls_private_key.ssh_key.private_key_pem
-  acl    = "private"
-
-  # Enable server-side encryption
-  server_side_encryption = "AES256"
-}
-
-
-
-
 resource "aws_instance" "example_instance" {
   ami           = "ami-0a0e5d9c7acc336f1" # Amazon Linux 2 AMI
   instance_type = "t2.micro"              # Adjust instance type as needed
@@ -204,7 +163,7 @@ resource "aws_instance" "example_instance" {
     volume_size = 50 # Adjust volume size as needed
   }
 
-  key_name = aws_key_pair.host_key_pair.key_name
+  key_name = "myjupt"
   user_data       = <<-EOF
               #!/bin/bash
               echo "Hello, World 2" > index.html
@@ -214,6 +173,11 @@ resource "aws_instance" "example_instance" {
   tags = {
     Name = "PublicInstance"
   }
+}
+
+output "instance_public_ip" {
+  description = "Public IP address of the EC2 instance"
+  value       = aws_instance.example_instance.public_ip
 }
 
 resource "aws_security_group" "database_sg" {
