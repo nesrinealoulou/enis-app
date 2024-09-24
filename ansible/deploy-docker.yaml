@@ -126,14 +126,24 @@
         name: mysqlclient  # You can also use PyMySQL here
         executable: pip3  # Ensure pip3 is used to install the package for Python 3
 
-    - name: Create the database
+    - name: Check if the database exists
       mysql_db:
-        login_host: mydb.cwmk9ndzb6pr.us-east-1.rds.amazonaws.com  # RDS endpoint
-        login_user: dbuser  # Username from Django settings
-        login_password: dbpassword  # Password from Django settings
-        name: mydb  # Database name to be created
+        login_host: mydb.cwmk9ndzb6pr.us-east-1.rds.amazonaws.com
+        login_user: dbuser
+        login_password: dbpassword
+        name: mydb
         state: present
-        login_port: 3306  # MySQL port
+      register: db_exists
+
+    - name: Create the database if it doesn't exist
+      mysql_db:
+        login_host: mydb.cwmk9ndzb6pr.us-east-1.rds.amazonaws.com
+        login_user: dbuser
+        login_password: dbpassword
+        name: mydb
+        state: present
+      when: not db_exists.changed
+
 
 - name: start docker containers
   hosts: ec2-docker
