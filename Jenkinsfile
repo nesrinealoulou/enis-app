@@ -150,6 +150,20 @@ pipeline {
                 }
             }
         }
+         stage('Run Migrations') {
+            steps {
+                script {
+                    echo 'Running Django Migrations...'
+                    // Assuming you're using a Docker container to run the app
+                    // Replace 'your-app-container' with the name or ID of your running container
+                    
+                    // You can use this to run migration inside the container:
+                    sh '''
+                    docker exec -it backend-app bash -c "python manage.py migrate"
+                    '''
+                }
+            }
+        }
         
 
     }
