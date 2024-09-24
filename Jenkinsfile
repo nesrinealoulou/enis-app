@@ -64,7 +64,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 script{
-                    sleep("time": 90, "unit": "SECONDS")
+                    sleep("time": 30, "unit": "SECONDS")
                 }
                 echo 'Cloning the repository...'
                 git url: 'https://github.com/nesrinealoulou/enis-app.git', branch: 'main'
@@ -152,6 +152,9 @@ pipeline {
         }
          stage('Run Migrations') {
             steps {
+                script{
+                    sleep("time": 30, "unit": "SECONDS")
+                }
                 script {
                     echo 'Running Django Migrations...'
                     // Assuming you're using a Docker container to run the app
