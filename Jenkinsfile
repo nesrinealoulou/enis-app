@@ -156,6 +156,13 @@ pipeline {
                     sleep("time": 30, "unit": "SECONDS")
                 }
                 script {
+                    echo 'Listing all running Docker containers...'
+            
+                    // List all running Docker containers and display in Jenkins console
+                    sh '''
+                    echo "Currently running Docker containers:"
+                    docker ps
+                    '''
                     echo 'Running Django Migrations...'
                     // Assuming you're using a Docker container to run the app
                     // Replace 'your-app-container' with the name or ID of your running container
