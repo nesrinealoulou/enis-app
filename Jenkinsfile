@@ -9,8 +9,41 @@ pipeline {
     }
 
     stages {
+        stage('Provision Server') {
+                    environment {
+                        AWS_ACCESS_KEY_ID     = credentials('jenkins_aws_access_key_id')
+                        AWS_SECRET_ACCESS_KEY = credentials('jenkins_aws_secret_access_key')
+                        EC2_PUBLIC_IP = sh(script: "terraform output ec2_public_ip",returnStdout: true
+                        ).trim()
+
+                    }
+                    steps {
+                        script {
+                            dir('terraform') {
+                                // Initialize Terraform
+                                sh "terraform init"
+                                
+                                // Apply Terraform configuration
+                                sh "terraform apply --auto-approve"
+                                
+                                // Capture the EC2 Public IP from Terraform output
+                                def EC2_PUBLIC_IP = sh(script: "terraform output -raw ec2_public_ip", returnStdout: true).trim()
+                                
+                                // Update config.js with the captured IP address
+                                echo "Updating config.js with EC2 Public IP: ${EC2_PUBLIC_IP}"
+                                writeFile file: 'frontend/src/config.js', text: """
+                                export const API_BASE_URL = 'http://${EC2_PUBLIC_IP}:8000';
+                                """
+                            }
+                        }
+                    }
+                }
+
         stage('Clone Repository') {
             steps {
+                script{
+                    sleep("time": 90, "unit": "SECONDS")
+                }
                 echo 'Cloning the repository...'
                 git url: 'https://github.com/nesrinealoulou/enis-app.git', branch: 'main'
             }
@@ -71,20 +104,7 @@ pipeline {
                 }
             }
         }
-        stage('Provision Server') {
-            environment {
-                AWS_ACCESS_KEY_ID     = credentials('jenkins_aws_access_key_id')
-                AWS_SECRET_ACCESS_KEY = credentials('jenkins_aws_secret_access_key')
-            }
-            steps {
-                script {
-                    dir('terraform') {
-                        sh "terraform init"
-                        sh "terraform apply --auto-approve"
-                    }
-                }
-            }
-        }
+        
 
     }
 }

@@ -1,10 +1,11 @@
 import axios from "axios";
 import { ACCESS_TOKEN } from "./constants";
+import { API_BASE_URL } from "./config";
 
 const apiUrl = "http";
 
 const api = axios.create({
-  baseURL: "http://tp_cloud_devops_vpc.com:8000"
+  baseURL: API_BASE_URL  // Use the base URL dynamically
 });
 
 api.interceptors.request.use(
