@@ -4,7 +4,7 @@ import { ACCESS_TOKEN } from "./constants";
 const apiUrl = "http";
 
 const api = axios.create({
-  baseURL: "http://18.212.130.145:8000"
+  baseURL: "http://tp_cloud_devops_vpc.com:8000"
 });
 
 api.interceptors.request.use(
