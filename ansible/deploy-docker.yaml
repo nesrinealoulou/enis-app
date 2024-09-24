@@ -1,0 +1,158 @@
+---
+- name: Install Docker and Docker-compose
+  hosts: ec2-docker  # This applies to both tasks
+  become: yes
+  tasks:
+    
+    - name: Update apt cache manually
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        update_cache: yes
+        state: present
+   
+    - name: Install Docker-compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.27.4/docker-compose-Linux-{{ ansible_architecture }}
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'  # Correct way to set the mode
+    - name: Ensure Docker service is started
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install pip3
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: Install Docker and Docker Compose Python packages using pip3
+      pip:
+        name:
+          - docker==5.0.0
+          - docker-compose==1.29.2
+        executable: pip3
+
+      
+
+- name: Add ubuntu user to docker group
+  hosts: ec2-docker
+  become: yes
+  tasks:
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Reconnect to server session
+      meta: reset_connection
+
+- name: Pull Docker image for the frontend from ECR to EC2 instance
+  hosts: ec2-docker
+  become: yes
+  vars:
+    ecr_url: "746200881003.dkr.ecr.us-east-1.amazonaws.com"
+    ecr_repository: "enis-app"
+    image_tag: "frontend-app-latest"
+    region: "us-east-1"
+  tasks:
+    - name: Log in to Amazon ECR
+      docker_login:
+        registry_url: "{{ ecr_url }}"
+        username: AWS
+        password: "{{ lookup('pipe', 'aws ecr get-login-password --region ' + region) }}"
+        reauthorize: yes
+
+    - name: Pull Docker image from ECR
+      docker_image:
+        name: "{{ ecr_url }}/{{ ecr_repository }}"
+        tag: "{{ image_tag }}"
+        source: pull
+    
+- name: Pull Docker for the backend image from ECR to EC2 instance
+  hosts: ec2-docker
+  become: yes
+  vars:
+    ecr_url: "746200881003.dkr.ecr.us-east-1.amazonaws.com"
+    ecr_repository: "enis-app"
+    image_tag: "backend-app-latest"
+    region: "us-east-1"
+  tasks:
+    - name: Log in to Amazon ECR
+      docker_login:
+        registry_url: "{{ ecr_url }}"
+        username: AWS
+        password: "{{ lookup('pipe', 'aws ecr get-login-password --region ' + region) }}"
+        reauthorize: yes
+
+    - name: Pull Docker image from ECR
+      docker_image:
+        name: "{{ ecr_url }}/{{ ecr_repository }}"
+        tag: "{{ image_tag }}"
+        source: pull
+
+- name: Create a MySQL database in AWS RDS
+  hosts: ec2-docker
+  become: yes
+  tasks:
+    - name: Install MySQL client
+      package:
+        name: mysql-client
+        state: present
+
+    - name: Install pkg-config
+      package:
+        name: pkg-config
+        state: present
+
+    - name: Install MySQL development libraries
+      package:
+        name: default-libmysqlclient-dev  # or libmysqlclient-dev depending on your system
+        state: present
+
+    - name: Install python3-pip
+      package:
+        name: python3-pip
+        state: present
+
+    - name: Install MySQL-python dependencies for Python 3
+      pip:
+        name: mysqlclient  # You can also use PyMySQL here
+        executable: pip3  # Ensure pip3 is used to install the package for Python 3
+
+    - name: Create the database
+      mysql_db:
+        login_host: mydb.cwmk9ndzb6pr.us-east-1.rds.amazonaws.com  # RDS endpoint
+        login_user: dbuser  # Username from Django settings
+        login_password: dbpassword  # Password from Django settings
+        name: mydb  # Database name to be created
+        state: present
+        login_port: 3306  # MySQL port
+
+- name: start docker containers
+  hosts: ec2-docker
+  become: yes
+  tasks:
+    - name: Create Docker Network
+      docker_network:
+            name: my_bridge
+            state: present
+
+    - name: Copy docker compose to my ec2 instance
+      copy:
+        src: /home/nessrine/enis/enis-app/docker-compose.yaml
+        dest: /home/ubuntu
+
+    - name: start docker containers from compose
+      docker_compose:
+        project_src: /home/ubuntu
+        state: present #eq a docker-compose up  by dault, absent eq a docker-compose down
+
+
+  
