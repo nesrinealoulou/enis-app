@@ -6,6 +6,7 @@ pipeline {
         REPOSITORY_FRONTEND = '746200881003.dkr.ecr.us-east-1.amazonaws.com/enis-app:frontend-app-latest'
         REPOSITORY_BACKEND = '746200881003.dkr.ecr.us-east-1.amazonaws.com/enis-app:backend-app-latest'
         AWS_CREDENTIALS_ID = 'aws-credentials'  // ID of the AWS credentials stored in Jenkins
+        ANSIBLE_CONFIG = "${WORKSPACE}/ansible/ansible.cfg"
     }
 
     stages {
