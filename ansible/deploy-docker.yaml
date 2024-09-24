@@ -156,7 +156,7 @@
 
     - name: Copy docker compose to my ec2 instance
       copy:
-        src: /home/nessrine/enis/enis-app/docker-compose.yaml
+        src: "{{ playbook_dir }}/../docker-compose.yaml" 
         dest: /home/ubuntu
 
     - name: start docker containers from compose
