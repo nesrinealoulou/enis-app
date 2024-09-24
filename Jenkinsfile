@@ -128,12 +128,15 @@ pipeline {
         }
         stage('Run Ansible Playbook') {
             steps {
+                environment {
+                        AWS_ACCESS_KEY_ID     = credentials('jenkins_aws_access_key_id')
+                        AWS_SECRET_ACCESS_KEY = credentials('jenkins_aws_secret_access_key')
+                        EC2_PUBLIC_IP = sh(script: "terraform output ec2_public_ip",returnStdout: true
+                        ).trim()
+
+                    }
                 script {
-                    withEnv([
-                "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}",
-                "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}",
-                "AWS_DEFAULT_REGION=us-east-1"
-                    ])
+                    
                     // Assuming Ansible and SSH configurations are already in place
                     echo 'Running Ansible Playbook...'
                     sh 'chmod 600 ${WORKSPACE}/ansible/myjupt.pem'
