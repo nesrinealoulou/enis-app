@@ -112,7 +112,7 @@ pipeline {
                     
                     // Run the Ansible playbook
                     sh '''
-                    ansible-playbook -i ansible/hosts ansible/deploy-docker.yml
+                    ansible-playbook -i ansible/hosts ansible/deploy-docker.yaml
                     '''
                 }
             }
