@@ -129,6 +129,11 @@ pipeline {
         stage('Run Ansible Playbook') {
             steps {
                 script {
+                    withEnv([
+                "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}",
+                "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}",
+                "AWS_DEFAULT_REGION=us-east-1"
+                    ])
                     // Assuming Ansible and SSH configurations are already in place
                     echo 'Running Ansible Playbook...'
                     sh 'chmod 600 ${WORKSPACE}/ansible/myjupt.pem'
