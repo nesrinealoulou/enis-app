@@ -195,7 +195,7 @@ resource "aws_db_subnet_group" "database_subnet_group" {
 
 resource "aws_db_instance" "db_instance" {
   allocated_storage      = 20
-  storage_type           = "gp3"
+  storage_type           = "gp2"
   engine                 = "mysql"
   engine_version         = "8.0.35"
   instance_class         = "db.r5d.large"
