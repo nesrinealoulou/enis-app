@@ -159,6 +159,11 @@ pipeline {
                     
                     // You can use this to run migration inside the container:
                     sh '''
+                    docker exec -it backend-app bash -c "python manage.py makemigrations"
+                    '''
+
+                    // Run Django migrations inside the backend Docker container
+                    sh '''
                     docker exec -it backend-app bash -c "python manage.py migrate"
                     '''
                 }
