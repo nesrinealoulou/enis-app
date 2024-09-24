@@ -163,6 +163,12 @@
       docker_compose:
         project_src: /home/ubuntu
         state: present #eq a docker-compose up  by dault, absent eq a docker-compose down
+        
+    - name: Run makemigrations inside backend-app container
+      command: docker exec backend-app python manage.py makemigrations
+
+    - name: Run migrate inside backend-app container
+      command: docker exec backend-app python manage.py migrat
 
 
   
