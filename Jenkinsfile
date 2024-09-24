@@ -64,8 +64,27 @@ pipeline {
                     echo 'Tagging and pushing Backend Image...'
                     sh "docker tag backend-app:latest $REPOSITORY_BACKEND"
                     sh "docker push $REPOSITORY_BACKEND"
+                    EC2_PUBLIC_IP = sh(
+                    script: "terraform output ec2_public_ip",
+                    returnStdout: true
+                ).trim()
                 }
             }
         }
+        stage('Provision Server') {
+            environment {
+                AWS_ACCESS_KEY_ID     = credentials('jenkins_aws_access_key_id')
+                AWS_SECRET_ACCESS_KEY = credentials('jenkins_aws_secret_access_key')
+            }
+            steps {
+                script {
+                    dir('terraform') {
+                        sh "terraform init"
+                        sh "terraform apply --auto-approve"
+                    }
+                }
+            }
+        }
+
     }
 }
