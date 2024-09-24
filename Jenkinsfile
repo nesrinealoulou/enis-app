@@ -43,10 +43,13 @@ pipeline {
                                 [ec2-docker]
                                 ${EC2_PUBLIC_IP}
                                 [ec2-docker:vars]
-                                ansible_ssh_private_key_file=myjupt.pem
+                                ansible_ssh_private_key_file=${WORKSPACE}/ansible/myjupt.pem
                                 ansible_user=ubuntu
                                 """
-                                // Echo the contents of the Ansible hosts file
+                                // Set correct permissions for the private key
+                                sh 'chmod 400 ${WORKSPACE}/ansible/myjupt.pem'
+
+                                // Debugging: Print the contents of the hosts file
                                 echo "Ansible hosts file updated. Contents:"
                                 sh 'cat ansible/hosts'
                             }
