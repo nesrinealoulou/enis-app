@@ -47,15 +47,14 @@ pipeline {
                                 ansible_user=ubuntu
                                 """
                                 // Set correct permissions for the private key
-                                sh 'chmod 600 ${WORKSPACE}/ansible/myjupt.pem'
-                                sh 'chown jenkins:jenkins ${WORKSPACE}/ansible/myjupt.pem'
-                                sh 'ls -l ${WORKSPACE}/ansible/myjupt.pem'
+                                
+                                
 
 
                                 // Debugging: Print the contents of the hosts file
                                 echo "Ansible hosts file updated. Contents:"
                                 sh 'cat ansible/hosts'
-                                sh "terraform apply --auto-approve -lock=false"
+                                
 
                             }
                         }
@@ -132,6 +131,7 @@ pipeline {
                 script {
                     // Assuming Ansible and SSH configurations are already in place
                     echo 'Running Ansible Playbook...'
+                    sh 'chmod 600 ${WORKSPACE}/ansible/myjupt.pem'
                     
                     // Run the Ansible playbook
                     sh '''
