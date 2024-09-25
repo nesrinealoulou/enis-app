@@ -34,25 +34,6 @@ pipeline {
                 }
             }
         }
-        stage('Unlock Terraform') {
-            steps {
-                script {
-                    dir('terraform') {
-                        // Run command to check for existing locks and extract lock ID
-                        def lockCheck = sh(script: "terraform show -json | jq '.resource_changes[] | select(.change.actions[0] == \"create\") | .id'", returnStdout: true).trim()
-                        
-                        // If a lock exists, force unlock
-                        if (lockCheck) {
-                            def lockId = lockCheck // Assume lockCheck returns the lock ID
-                            echo "Lock ID found: ${lockId}. Attempting to unlock..."
-                            sh "terraform force-unlock ${lockId}"
-                        } else {
-                            echo "No lock found."
-                        }
-                    }
-                }
-            }
-        }
         stage('Clone Repository') {
             steps {
                 script{
