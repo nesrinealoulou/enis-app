@@ -6,61 +6,51 @@ pipeline {
         REPOSITORY_FRONTEND = '746200881003.dkr.ecr.us-east-1.amazonaws.com/enis-app:frontend-app-latest'
         REPOSITORY_BACKEND = '746200881003.dkr.ecr.us-east-1.amazonaws.com/enis-app:backend-app-latest'
         AWS_CREDENTIALS_ID = 'aws-credentials'  // ID of the AWS credentials stored in Jenkins
+        KEY_PATH = "${WORKSPACE}/ansible/myjupt.pem"
         ANSIBLE_CONFIG = "${WORKSPACE}/ansible/ansible.cfg"
     }
 
     stages {
-        stage('Provision Server') {
-                    environment {
-                        AWS_ACCESS_KEY_ID     = credentials('jenkins_aws_access_key_id')
-                        AWS_SECRET_ACCESS_KEY = credentials('jenkins_aws_secret_access_key')
-                        EC2_PUBLIC_IP = sh(script: "terraform output ec2_public_ip",returnStdout: true
-                        ).trim()
-
-                    }
-                    steps {
-                        script {
-                            dir('terraform') {
-                                // Initialize Terraform
-                                sh "terraform init"
-                                
-                                // Apply Terraform configuration
-                                sh "terraform apply --auto-approve"
-                                
-                                // Capture the EC2 Public IP from Terraform output
-                                def EC2_PUBLIC_IP = sh(script: "terraform output -raw ec2_public_ip", returnStdout: true).trim()
-                                
-                                // Update config.js with the captured IP address
-                                echo "Updating config.js with EC2 Public IP: ${EC2_PUBLIC_IP}"
-                                writeFile file: 'frontend/src/config.js', text: """
-                                export const API_BASE_URL = 'http://${EC2_PUBLIC_IP}:8000';
-                                """
-                                // Debugging: Print the IP address to the Jenkins console
-                                echo "Captured EC2 Public IP: ${EC2_PUBLIC_IP}"
-                                
-                                // Update Ansible hosts file with the EC2 public IP
-                                writeFile file: "${WORKSPACE}/ansible/hosts", text: """
-                                [ec2-docker]
-                                ${EC2_PUBLIC_IP}
-                                [ec2-docker:vars]
-                                ansible_ssh_private_key_file=${WORKSPACE}/ansible/myjupt.pem
-                                ansible_user=ubuntu
-                                """
-                                // Set correct permissions for the private key
-                                
-                                
-
-
-                                // Debugging: Print the contents of the hosts file
-                                echo "Ansible hosts file updated. Contents:"
-                                sh 'cat ansible/hosts'
-                                
-
-                            }
-                        }
-                    }
+        stage('Initialize and Apply Terraform') {
+            steps {
+                script {
+                    // Initialize and apply Terraform
+                    sh 'terraform init'
+                    sh 'terraform apply --auto-approve'
+                    
+                    // Extract and set the IP dynamically
+                    EC2_PUBLIC_IP = sh(script: "terraform output -raw ec2_public_ip", returnStdout: true).trim()
+                }
+            }
         }
+        stage('Configure Ansible Inventory') {
+            steps {
+                script {
+                    // Write the hosts file with the dynamically obtained IP
+                    writeFile file: "${WORKSPACE}/ansible/hosts", text: """
+                    [ec2-docker]
+                    ${EC2_PUBLIC_IP}
 
+                    [ec2-docker:vars]
+                    ansible_ssh_private_key_file=${KEY_PATH}
+                    ansible_user=ubuntu
+                    """
+
+                    // Print the hosts file to verify the contents
+                    echo "Contents of the hosts file:"
+                    sh "cat ${WORKSPACE}/ansible/hosts"
+                }
+            }
+        }
+        stage('Execute Ansible Playbook') {
+            steps {
+                ansiblePlaybook(
+                    playbook: 'ansible/playbook.yml',
+                    inventory: "${WORKSPACE}/ansible/hosts"
+                )
+            }
+        }
+    }
         stage('Clone Repository') {
             steps {
                 script{
