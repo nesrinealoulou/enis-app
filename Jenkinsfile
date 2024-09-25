@@ -50,7 +50,6 @@ pipeline {
                 )
             }
         }
-    }
         stage('Clone Repository') {
             steps {
                 script{
@@ -144,4 +143,4 @@ pipeline {
         
 
     }
-
+}
