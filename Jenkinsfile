@@ -110,6 +110,7 @@ pipeline {
             steps {
                 
                 script {
+                    def EC2_PUBLIC_IP = sh(script: "terraform output -raw ec2_public_ip", returnStdout: true).trim()
                     echo "ec2 ip : ${EC2_PUBLIC_IP}"
                     // Update Ansible hosts file with the EC2 public IP
                     writeFile file: "${WORKSPACE}/ansible/hosts", text: """
