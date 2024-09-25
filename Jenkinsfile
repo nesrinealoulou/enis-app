@@ -110,6 +110,7 @@ pipeline {
             steps {
                 
                 script {
+                    echo "ec2 ip : ${EC2_PUBLIC_IP}"
                     // Update Ansible hosts file with the EC2 public IP
                     writeFile file: "${WORKSPACE}/ansible/hosts", text: """
                     [ec2-docker]
