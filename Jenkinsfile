@@ -17,13 +17,10 @@ pipeline {
                     dir('terraform') {
                         // Initialize Terraform
                         sh "terraform init"
-                        
                         // Apply Terraform configuration
                         sh "terraform apply --auto-approve"
-                        
                         // Capture the EC2 Public IP from Terraform output
                         def EC2_PUBLIC_IP = sh(script: "terraform output -raw ec2_public_ip", returnStdout: true).trim()
-                        
                         // Update config.js with the captured IP address
                         echo "Updating config.js with EC2 Public IP: ${EC2_PUBLIC_IP}"
                         writeFile file: 'frontend/src/config.js', text: """
@@ -32,21 +29,7 @@ pipeline {
                         // Debugging: Print the IP address to the Jenkins console
                         echo "Captured EC2 Public IP: ${EC2_PUBLIC_IP}"
                         
-                        // Update Ansible hosts file with the EC2 public IP
-                        writeFile file: "${WORKSPACE}/ansible/hosts", text: """
-                        [ec2-docker]
-                        ${EC2_PUBLIC_IP}
-
-                        [ec2-docker:vars]
-                        ansible_ssh_private_key_file=${WORKSPACE}/ansible/myjupt.pem
-                        ansible_user=ubuntu
-                        """
-                        // Debugging: Print the contents of the hosts file
-                        echo "Ansible hosts file updated. Contents:"
-                        sh 'cat ${WORKSPACE}/ansible/hosts'
-
-                        // Set correct permissions for the private key
-                        sh "chmod 600 ${WORKSPACE}/ansible/myjupt.pem"
+                        
                     }
                 }
             }
@@ -127,6 +110,18 @@ pipeline {
             steps {
                 
                 script {
+                    // Update Ansible hosts file with the EC2 public IP
+                    writeFile file: "${WORKSPACE}/ansible/hosts", text: """
+                    [ec2-docker]
+                    ${EC2_PUBLIC_IP}
+
+                    [ec2-docker:vars]
+                    ansible_ssh_private_key_file=${WORKSPACE}/ansible/myjupt.pem
+                    ansible_user=ubuntu
+                    """
+                    // Debugging: Print the contents of the hosts file
+                    echo "Ansible hosts file updated. Contents:"
+                    sh 'cat ${WORKSPACE}/ansible/hosts'
                     
                     // Assuming Ansible and SSH configurations are already in place
                     echo 'Running Ansible Playbook...'
