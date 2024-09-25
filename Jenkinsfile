@@ -132,8 +132,9 @@ pipeline {
                         
                         // Run the Ansible playbook
                         sh '''
-                        ansible-playbook -i ../ansible/hosts ansible/deploy-docker.yaml --extra-vars "docker_compose_src=${WORKSPACE}/docker-compose.yaml"
-                        '''
+                            ansible-playbook -i ${WORKSPACE}/ansible/hosts ${WORKSPACE}/ansible/deploy-docker.yaml --extra-vars "docker_compose_src=${WORKSPACE}/docker-compose.yaml"
+                            '''
+
                         }
                 }
             }
