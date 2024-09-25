@@ -110,30 +110,31 @@ pipeline {
             steps {
                 
                 script {
-                    def EC2_PUBLIC_IP = sh(script: "terraform output -raw ec2_public_ip", returnStdout: true).trim()
-                    echo "ec2 ip : ${EC2_PUBLIC_IP}"
-                    // Update Ansible hosts file with the EC2 public IP
-                    writeFile file: "${WORKSPACE}/ansible/hosts", text: """
-                    [ec2-docker]
-                    ${EC2_PUBLIC_IP}
+                    dir('terraform') {
+                        def EC2_PUBLIC_IP = sh(script: "terraform output -raw ec2_public_ip", returnStdout: true).trim()
+                        echo "ec2 ip : ${EC2_PUBLIC_IP}"
+                        // Update Ansible hosts file with the EC2 public IP
+                        writeFile file: "${WORKSPACE}/ansible/hosts", text: """
+                        [ec2-docker]
+                        ${EC2_PUBLIC_IP}
 
-                    [ec2-docker:vars]
-                    ansible_ssh_private_key_file=${WORKSPACE}/ansible/myjupt.pem
-                    ansible_user=ubuntu
-                    """
-                    // Debugging: Print the contents of the hosts file
-                    echo "Ansible hosts file updated. Contents:"
-                    sh 'cat ${WORKSPACE}/ansible/hosts'
-                    
-                    // Assuming Ansible and SSH configurations are already in place
-                    echo 'Running Ansible Playbook...'
-                    sh 'chmod 600 ${WORKSPACE}/ansible/myjupt.pem'
-                    
-                    // Run the Ansible playbook
-                    sh '''
-                    ansible-playbook -i ansible/hosts ansible/deploy-docker.yaml --extra-vars "docker_compose_src=${WORKSPACE}/docker-compose.yaml"
-                    '''
-
+                        [ec2-docker:vars]
+                        ansible_ssh_private_key_file=${WORKSPACE}/ansible/myjupt.pem
+                        ansible_user=ubuntu
+                        """
+                        // Debugging: Print the contents of the hosts file
+                        echo "Ansible hosts file updated. Contents:"
+                        sh 'cat ${WORKSPACE}/ansible/hosts'
+                        
+                        // Assuming Ansible and SSH configurations are already in place
+                        echo 'Running Ansible Playbook...'
+                        sh 'chmod 600 ${WORKSPACE}/ansible/myjupt.pem'
+                        
+                        // Run the Ansible playbook
+                        sh '''
+                        ansible-playbook -i ansible/hosts ansible/deploy-docker.yaml --extra-vars "docker_compose_src=${WORKSPACE}/docker-compose.yaml"
+                        '''
+                        }
                 }
             }
         }
