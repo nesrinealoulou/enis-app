@@ -39,7 +39,7 @@ pipeline {
                                 echo "Captured EC2 Public IP: ${EC2_PUBLIC_IP}"
                                 
                                 // Update Ansible hosts file with the EC2 public IP
-                                writeFile file: 'ansible/hosts', text: """
+                                writeFile file: "${WORKSPACE}/ansible/hosts", text: """
                                 [ec2-docker]
                                 ${EC2_PUBLIC_IP}
                                 [ec2-docker:vars]
@@ -59,7 +59,7 @@ pipeline {
                             }
                         }
                     }
-                }
+        }
 
         stage('Clone Repository') {
             steps {
